@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIABLO CODEX | Register</title>
+<style>
+body {
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: radial-gradient(circle at top, #1e1b4b, #020617);
+  font-family: 'Segoe UI', sans-serif;
+}
+.card {
+  width:90%;
+  max-width:380px;
+  padding:30px;
+  border-radius:20px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+h2 { text-align:center; background: linear-gradient(90deg,#a855f7,#6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:20px;}
+input, button {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:12px;
+}
+input {
+  background: rgba(255,255,255,0.08);
+  color:white;
+}
+button {
+  background: linear-gradient(135deg,#a855f7,#6366f1);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+.message {
+  text-align:center;
+  font-size:13px;
+  color:#fbbf24;
+  margin-top:5px;
+}
+.error {
+  text-align:center;
+  font-size:13px;
+  color:#ef4444;
+  margin-top:5px;
+}
+a {
+  color:#a855f7;
+  text-decoration:none;
+}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>📝 Register</h2>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+<form method="POST">
+<input name="username" placeholder="Username" required>
+<input name="password" type="password" placeholder="Password" required>
+<button>Create Account</button>
+</form>
+<p class="message">Already have account? <a href="/">Login</a></p>
+</div>
+</body>
+</html>

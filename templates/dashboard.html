@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DIABLO CODEX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    background: radial-gradient(circle at top,#1e1b4b,#020617);
+    color:white;
+}
+
+/* HEADER */
+header{
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.05);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.logo{
+    font-size:18px;
+    font-weight:bold;
+    background: linear-gradient(90deg,#a855f7,#6366f1);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/* CONTAINER */
+.container{
+    padding:15px;
+    max-width:1200px;
+    margin:auto;
+}
+
+/* FORM */
+form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+@media(min-width:600px){
+    form{flex-direction:row;}
+}
+
+input,select{
+    flex:1;
+    padding:12px;
+    border-radius:12px;
+    border:none;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    color:white;
+}
+
+button{
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background: linear-gradient(135deg,#a855f7,#6366f1);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    gap:15px;
+}
+
+@media(min-width:600px){
+    .grid{
+        grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    }
+}
+
+/* CARD */
+.card{
+    padding:18px;
+    border-radius:16px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(15px);
+    border:1px solid rgba(255,255,255,0.1);
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    transition:0.2s;
+}
+
+.card:hover{
+    transform: translateY(-4px);
+}
+
+.url{
+    font-size:13px;
+    word-break:break-all;
+    color:#c4b5fd;
+}
+
+/* STATUS */
+.status{
+    margin-top:8px;
+    font-weight:bold;
+}
+
+.up{color:#22c55e;}
+.down{color:#ef4444;}
+
+.small{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+/* DELETE */
+.delete{
+    margin-top:10px;
+    display:inline-block;
+    font-size:12px;
+    color:#ef4444;
+    text-decoration:none;
+}
+
+/* FOOTER */
+.footer{
+    margin-top:20px;
+    text-align:center;
+    font-size:12px;
+    color:#64748b;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">🔥 DIABLO CODEX</div>
+    <div style="font-size:12px;color:#aaa;">{{session['user']}}</div>
+</header>
+
+<div class="container">
+
+<!-- ADD FORM -->
+<form method="POST" action="/add" onsubmit="playClick()">
+    <input name="url" placeholder="https://example.com" required>
+
+    <select name="interval">
+        <option value="30">30s</option>
+        <option value="60" selected>1m</option>
+        <option value="120">2m</option>
+        <option value="300">5m</option>
+    </select>
+
+    <input type="number" name="custom_interval" placeholder="Custom seconds (optional)" min="5">
+
+    <button>Add Monitor</button>
+</form>
+
+<!-- MONITOR GRID -->
+<div id="grid" class="grid"></div>
+
+<div class="footer">
+    ⚡ DIABLO CODEX Monitoring System
+</div>
+
+</div>
+
+<!-- 🔊 SOUND EFFECTS -->
+<audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+<audio id="statusSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+
+<script>
+let lastStatus = {};
+let clickSound = document.getElementById("clickSound");
+let statusSound = document.getElementById("statusSound");
+
+// Fix autoplay restriction
+document.body.addEventListener("click", () => {
+    clickSound.volume = 0.5;
+    statusSound.volume = 0.5;
+});
+
+// Play click sound
+function playClick(){
+    clickSound.currentTime = 0;
+    clickSound.play().catch(()=>{});
+}
+
+// Load monitors
+async function loadData(){
+    const res = await fetch('/api/monitors');
+    const data = await res.json();
+
+    let html = "";
+
+    data.forEach(m => {
+        // Status change sound
+        if(lastStatus[m[0]] && lastStatus[m[0]] !== m[2]){
+            statusSound.currentTime = 0;
+            statusSound.play().catch(()=>{});
+        }
+
+        lastStatus[m[0]] = m[2];
+
+        html += `
+        <div class="card">
+            <div class="url">${m[1]}</div>
+            <div class="status ${m[2]=='UP'?'up':'down'}">${m[2]}</div>
+            <div class="small">Response: ${m[3]} sec</div>
+            <div class="small">Interval: ${m[4]} sec</div>
+            <div class="small">Checks: ${m[6]}</div>
+            <a class="delete" href="/delete/${m[0]}" onclick="playClick()">Delete</a>
+        </div>`;
+    });
+
+    document.getElementById("grid").innerHTML = html;
+}
+
+// Auto refresh
+setInterval(loadData, 5000);
+loadData();
+</script>
+
+</body>
+</html>
